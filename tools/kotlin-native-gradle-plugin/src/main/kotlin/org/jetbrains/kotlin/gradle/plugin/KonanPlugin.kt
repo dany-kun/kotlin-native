@@ -356,8 +356,7 @@ class KonanPlugin @Inject constructor(private val registry: ToolingModelBuilderR
             if (!isPublicationEnabled)
                 return@afterEvaluate
             project.pluginManager.withPlugin("maven-publish") {
-                container.all {
-                    val buildingConfig = it
+                container.all { buildingConfig ->
                     val konanSoftwareComponent = buildingConfig.mainVariant
                     project.extensions.configure(PublishingExtension::class.java) {
                         val builtArtifact = buildingConfig.name
@@ -375,10 +374,9 @@ class KonanPlugin @Inject constructor(private val registry: ToolingModelBuilderR
                     project.extensions.configure(PublishingExtension::class.java) {
                         val publishing = it
                         for (v in konanSoftwareComponent.variants) {
-                            publishing.publications.create(v.name, MavenPublication::class.java) {
+                            publishing.publications.create(v.name, MavenPublication::class.java) { mavenPublication ->
                                 val coordinates = (v as NativeVariantIdentity).coordinates
                                 project.logger.info("variant with coordinates($coordinates) and module: ${coordinates.module}")
-                                val mavenPublication = it
                                 mavenPublication.artifactId = coordinates.module.name
                                 mavenPublication.groupId = coordinates.group
                                 mavenPublication.version = coordinates.version
