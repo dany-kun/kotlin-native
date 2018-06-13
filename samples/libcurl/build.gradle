@@ -13,7 +13,7 @@ konanArtifacts {
         target('macbook') {
             includeDirs.headerFilterOnly '/opt/local/include', '/usr/local/include'
         }
-        pom{
+        pom {
             withXml {
                 def root = asNode()
                 root.appendNode('name', 'libcurl interop library')
