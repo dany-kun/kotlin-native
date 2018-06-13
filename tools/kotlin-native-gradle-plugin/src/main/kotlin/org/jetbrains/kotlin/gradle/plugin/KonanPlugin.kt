@@ -27,9 +27,7 @@ import org.gradle.api.internal.project.ProjectInternal
 import org.gradle.api.plugins.BasePlugin
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
-import org.gradle.api.publish.maven.internal.publication.MavenPublicationInternal
 import org.gradle.language.cpp.internal.NativeVariantIdentity
-import org.gradle.tooling.UnsupportedVersionException
 import org.gradle.tooling.provider.model.ToolingModelBuilderRegistry
 import org.gradle.util.GradleVersion
 import org.jetbrains.kotlin.gradle.plugin.KonanPlugin.Companion.COMPILE_ALL_TASK_NAME
@@ -369,6 +367,9 @@ class KonanPlugin @Inject constructor(private val registry: ToolingModelBuilderR
                             groupId = project.group.toString()
                             from(konanSoftwareComponent)
                         }
+                        buildingConfig.pomAction?.let {
+                            mavenPublication.pom(it)
+                        }
                     }
 
                     project.extensions.configure(PublishingExtension::class.java) {
@@ -377,10 +378,14 @@ class KonanPlugin @Inject constructor(private val registry: ToolingModelBuilderR
                             publishing.publications.create(v.name, MavenPublication::class.java) {
                                 val coordinates = (v as NativeVariantIdentity).coordinates
                                 project.logger.info("variant with coordinates($coordinates) and module: ${coordinates.module}")
-                                it.artifactId = coordinates.module.name
-                                it.groupId = coordinates.group
-                                it.version = coordinates.version
-                                it.from(v)
+                                val mavenPublication = it
+                                mavenPublication.artifactId = coordinates.module.name
+                                mavenPublication.groupId = coordinates.group
+                                mavenPublication.version = coordinates.version
+                                mavenPublication.from(v)
+                                buildingConfig.pomAction?.let {
+                                    mavenPublication.pom(it)
+                                }
                             }
                         }
                     }
